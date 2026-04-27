@@ -1,38 +1,51 @@
-## Simple Responsive Landing Page
+## Configure project for static deployment on Netlify
 
-A clean, minimal light-themed personal landing page — single screen, mobile-first, centered layout.
+The project currently uses `@lovable.dev/vite-tanstack-config`, which targets a Cloudflare Worker (SSR) build. Netlify static deployment needs a plain client-side SPA build output in `dist/` with `index.html` as the entry, plus the existing `_redirects` for SPA fallback.
 
-### Layout (top → bottom, centered)
+The simplest, most reliable approach is to bypass the Lovable Cloudflare-oriented config when building for Netlify and produce a standard Vite SPA build. Since this is a single-page landing page with no server functions, SSR is not needed.
 
-1. **Profile picture** — circular avatar (~112px), placeholder image
-2. **Name + handle** — name (bold), @handle (muted)
-3. **Blurb** — 1–2 sentence bio, max ~480px wide
-4. **Stacked link buttons** — full-width pill buttons with social icons:
-   - Twitter / X
-   - Instagram
-   - LinkedIn
-   - GitHub
-   - Email
-5. **Footer** — small muted copyright line
+### What the plan does
 
-### Visual style
+1. **Add a Netlify-specific Vite config** — `vite.netlify.config.ts` that builds a standard React SPA (no TanStack Start SSR plugin, no Cloudflare plugin). It will include:
+   - `@vitejs/plugin-react`
+   - `@tailwindcss/vite`
+   - `vite-tsconfig-paths`
+   - TanStack Router plugin in **code-splitting / file-based routing** mode (generates `routeTree.gen.ts`, no SSR)
+   - A tiny `index.html` entry that mounts the router client-side
 
-- White background, near-black text, subtle gray borders
-- Clean sans-serif (system default via Tailwind)
-- Pill buttons (`rounded-full`), full width, hover: light gray fill + subtle scale
-- Comfortable vertical spacing, generous padding on mobile
-- Max content width ~28rem, centered horizontally and vertically
+2. **Add a client entry** — `src/main.tsx` that creates the router via `getRouter()` and renders `<RouterProvider />` into `#root`. This is only used by the Netlify build; the Lovable/Cloudflare build is untouched.
 
-### Responsive behavior
+3. **Add `index.html`** at project root (Vite SPA convention) with the meta tags currently in `__root.tsx` hardcoded, plus `<div id="root"></div>` and `<script type="module" src="/src/main.tsx">`.
 
-- Mobile: full-width buttons with side padding, avatar slightly smaller
-- Desktop: same centered column, just more breathing room above/below
+4. **Add `netlify.toml`** with:
+   ```
+   [build]
+     command = "bun run build:netlify"
+     publish = "dist"
+   ```
+   (SPA fallback is already handled by the existing `public/_redirects`.)
 
-### Files
+5. **Add `build:netlify` script** to `package.json`:
+   ```
+   "build:netlify": "vite build --config vite.netlify.config.ts"
+   ```
 
-- Replace `src/routes/index.tsx` with the landing page (single route, no extra pages needed)
-- Update `__root.tsx` meta title/description to "Your Name — Links"
-- Use `lucide-react` icons (already available) for socials; brand-style icons for X/Instagram/LinkedIn/GitHub, Mail for email
-- All link `href`s use `#` placeholders that you can edit later
+6. **Keep the existing setup intact** — `vite.config.ts`, `wrangler.jsonc`, `src/router.tsx`, `src/routes/__root.tsx`, and `src/routes/index.tsx` are not modified. Lovable preview and publish continue to work exactly as before.
 
-No backend, no database, no extra dependencies.
+### Deployment steps for you
+
+On Netlify:
+- Connect the repo
+- Build command: `bun run build:netlify` (or leave blank — `netlify.toml` sets it)
+- Publish directory: `dist`
+- No environment variables required
+
+### Trade-offs
+
+- **No SSR on Netlify.** The site will be a pure client-rendered SPA. For this landing page that's fine — content is static and SEO-relevant meta tags live in `index.html`.
+- If you later add server functions or per-route dynamic `head()` metadata that must be crawlable, we'd need to switch to Netlify's Edge Functions adapter instead. Not needed today.
+
+### Technical notes
+
+- The `__root.tsx` `head()` meta tags won't be injected into the static HTML (no SSR), so the same tags are duplicated into `index.html` for crawlers/social previews. Client-side, TanStack Router will still manage them via `<HeadContent />` during navigation.
+- `shellComponent` in `__root.tsx` renders `<html>`/`<body>` — for the SPA build we skip that and let `index.html` provide the shell, rendering `<Outlet />` directly via `RouterProvider`.
