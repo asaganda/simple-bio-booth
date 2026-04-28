@@ -24,7 +24,7 @@ function Index() {
         <h1 className="mt-5 text-2xl font-semibold tracking-tight">Andrew Saganda</h1>
         {/* <p className="mt-1 text-sm text-muted-foreground">@yourhandle</p> */}
 
-        <p className="mt-4 text-base text-muted-foreground leading-relaxed max-w-sm">
+        <p className="mt-4 text-base text-foreground leading-relaxed max-w-sm">
           Hi, my name is Andrew. I'm a software engineer and technology consultant for small to medium businesses. On the consulting side, My goal is to provide technology services that results in recovering time and generate more business revenue.
         </p>
 
