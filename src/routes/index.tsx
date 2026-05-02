@@ -23,9 +23,13 @@ function Index() {
 
         <h1 className="mt-5 text-2xl font-semibold tracking-tight">Andrew Saganda</h1>
         {/* <p className="mt-1 text-sm text-muted-foreground">@yourhandle</p> */}
+        <h2 class="mt-5 text-xl tracking-tight">Technology Professional</h2>
 
         <p className="mt-4 text-base text-foreground leading-relaxed max-w-sm">
-          Hi, my name is Andrew. I'm a software engineer and technology consultant for small to medium businesses. On the consulting side, My goal is to provide technology services that results in recovering time and generate more business revenue.
+          Hi, I'm a software engineer with 8+ years of experience focused on the frontend (UI). I've been building fast, accessible, and user-focused web experiences across e-commerce, healthcare advertising, and my own projects. I'm comfortable across the full stack when needed, but frontend is where I do my best work.
+        </p>
+        <p className="mt-4 text-base text-foreground leading-relaxed max-w-sm">
+          I also offer technology services to small and medium-sized businesses. My goal is to provide services that result in time back to managers/operators and generate more business revenue.
         </p>
 
         <nav className="mt-8 w-full flex flex-col gap-3" aria-label="Social links">
